@@ -509,9 +509,9 @@ MBOOL Hal3A::setParams(Param_T const &rNewParam)
 
 
 	//add by wjh for VEGETA-1215
-	//if(rNewParam.bIsANREnabled!= m_rParam.bIsANREnabled){
-		enableANR(rNewParam.bIsANREnabled);
-	//}
+	if(rNewParam.bIsANREnabled!= m_rParam.bIsANREnabled){
+		//enableANR(rNewParam.bIsANREnabled);
+	}
 	//add by wjh end
 
 
@@ -522,7 +522,7 @@ MBOOL Hal3A::setParams(Param_T const &rNewParam)
 
 //add by wjh for VEGETA-1215
 MVOID Hal3A::enableANR(MBOOL enable){
-	MY_LOG("ZJB enableANR\n");
+	MY_LOG("ZJB enableANR--------->1111\n");
 	IspTuningMgr::getInstance().setIspANREnable(enable);
 }
 //add by wjh end

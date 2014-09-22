@@ -1662,7 +1662,6 @@ PMU_STATUS do_batt_temp_state_machine(void)
 				MIN_CHARGE_TEMPERATURE,BMT_status.temperature, MIN_CHARGE_TEMPERATURE_PLUS_X_DEGREE); 
 			g_batt_temp_status = TEMP_POS_NORMAL;
 			BMT_status.bat_charging_state=CHR_PRE;
-                   g_BatteryNotifyCode |= 0x0040; //add low temperature recharging notify
 			return PMU_STATUS_OK;
 		} else {
 			return PMU_STATUS_FAIL;
@@ -1683,7 +1682,6 @@ PMU_STATUS do_batt_temp_state_machine(void)
 				MAX_CHARGE_TEMPERATURE,BMT_status.temperature,MAX_CHARGE_TEMPERATURE_MINUS_X_DEGREE); 
 			g_batt_temp_status = TEMP_POS_NORMAL;
 			BMT_status.bat_charging_state=CHR_PRE;
-                   g_BatteryNotifyCode |= 0x0080; //add high temperature recharging notify
 			return PMU_STATUS_OK;
 		} else {
 			return PMU_STATUS_FAIL;
@@ -2078,12 +2076,6 @@ static void mt_battery_notify_VBatTemp_check(void)
         g_BatteryNotifyCode |= 0x0002;
         battery_xlog_printk(BAT_LOG_CRTI, "[BATTERY] bat_temp(%d) out of range(too high)\n", BMT_status.temperature);		
     }
-
-    if(MAX_CHARGE_TEMPERATURE == BMT_status.temperature) 
-     {
-        g_BatteryNotifyCode |= 0x0100; //high temperature stop charging notify  added by kolery 20140826
-     }
-             
 #if defined(MTK_JEITA_STANDARD_SUPPORT)
 	else if (BMT_status.temperature < TEMP_NEG_10_THRESHOLD)
 	{

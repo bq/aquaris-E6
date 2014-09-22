@@ -21,8 +21,8 @@
 #define SWCHR_POWER_PATH 
 #endif
 #if defined(BAT_VOL_USE_ISENSE)
-#define VBAT_CHANNEL_NUMBER      6
-#define ISENSE_CHANNEL_NUMBER	 7
+#define VBAT_CHANNEL_NUMBER      7
+#define ISENSE_CHANNEL_NUMBER	 6
 #else
 #define VBAT_CHANNEL_NUMBER      7
 #define ISENSE_CHANNEL_NUMBER	 6

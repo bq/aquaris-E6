@@ -186,7 +186,7 @@ status_t AudioLoopbackController::OpenAudioLoopbackControlFlow(const audio_devic
 	mAudioDigitalInstance->SetinputConnection(AudioDigitalType::Connection, AudioDigitalType::I13, AudioDigitalType::O04);
 
 	mAudioDigitalInstance->SetHwDigitalGainMode(AudioDigitalType::HW_DIGITAL_GAIN2, AudioMEMIFAttribute::AFE_8000HZ, 0xC8);//8k
-	mAudioDigitalInstance->SetHwDigitalGain(0x0246B, AudioDigitalType::HW_DIGITAL_GAIN2);//-10db
+	mAudioDigitalInstance->SetHwDigitalGain(0x09994, AudioDigitalType::HW_DIGITAL_GAIN2);//-10db
 	mAudioDigitalInstance->SetHwDigitalGainEnable(AudioDigitalType::HW_DIGITAL_GAIN2, true);
 #else
         mAudioDigitalInstance->SetinputConnection(AudioDigitalType::Connection, AudioDigitalType::I03, AudioDigitalType::O03); // ADC_I2S_IN_L -> DAC_I2S_OUT_L
