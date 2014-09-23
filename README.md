@@ -14,7 +14,7 @@ clone the project:
 After it, choose the version you would like to build:
 
 	$ cd aquaris-E6/
-	$ git checkout 1.3.0_20140915-1729
+	$ git checkout 1.1.0_20140908-0900
 
 
 Finally, build the kernel:
