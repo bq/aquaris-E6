@@ -782,7 +782,7 @@ static unsigned char CTPM_FW[]=
 //#include "FT5336_HiKe_Vegeta_OGS_1080X1920_Truly0x5a_Ver0x16_20140618_app.i"
 //#include "FT5336_HiKe_Vegeta_OGS_1080X1920_Truly0x5a_Ver0x17_20140620_app.i"
 //#include "FT5336_HiKe_Vegeta_OGS_1080X1920_Truly0x5a_Ver0x18_20140626_app.i"
-#include "FT5336_HiKe_Vegeta_OGS_1080X1920_Truly0x5a_Ver0x19_20140725_app.i"
+#include "FT5336_HiKe_Vegeta_OGS_1080X1920_Truly0x5a_Ver0x20_20140903_app.i"
 };
 
 #define IC_FT5X06	0
