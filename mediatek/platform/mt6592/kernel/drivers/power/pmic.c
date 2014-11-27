@@ -4355,6 +4355,8 @@ static int mt_pmic_probe(struct platform_device *dev)
 
     xlog_printk(ANDROID_LOG_INFO, "Power/PMIC", "******** mt_pmic_probe!! ********\n" );
 
+    upmu_set_rg_vcdt_lv_vth(0x00);
+
     ret_device_file = device_create_file(&(dev->dev), &dev_attr_pmic_access);
 
     ret_device_file = device_create_file(&(dev->dev), &dev_attr_BUCK_VPROC_STATUS);

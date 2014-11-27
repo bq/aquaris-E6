@@ -163,7 +163,7 @@ FLASH_PROJECT_PARA& cust_getFlashProjectPara(int aeMode, NVRAM_CAMERA_STROBE_STR
 
 	//af
 	para.engLevel.afEngMode = ENUM_FLASH_ENG_INDEX_MODE;
-	para.engLevel.afDuty = 0;
+	para.engLevel.afDuty = 1;
 	para.engLevel.afStep = 0;
 
 	//pf, mf, normal

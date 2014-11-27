@@ -66,6 +66,10 @@
 
 extern struct tpd_device *tpd;
 
+//ckt-chunhui.lin
+#define FTS_PRESSURE
+#define PRESS_MAX	0xFF
+
 #ifdef Himax_Gesture
 #define GESTURE_DOUBLE_TAP 	0xFC
 #define GESTURE_NONE 		0xFB
@@ -77,6 +81,13 @@ unsigned char GestureEnable = 1;//wangli_20140729
 #endif
 
 extern void custom_vibration_enable(int);
+
+//************* add for doubletap + psensor ************//
+unsigned short ps_data;
+extern long TMD2772_enable_ps_tp(int value);
+extern long TMD2772_read_ps_tp(u16 *pvalue);
+extern int TMD2772_get_ps_value_tp(u16 value);
+//************* add for doubletap + psensor ************//
 
 //gionee songll 20131128 porting from mt6577 begin
 #ifdef GN_MTK_BSP_DEVICECHECK
@@ -6265,14 +6276,27 @@ int himax_charge_switch(s32 dir_update)
 
 
 
+#ifdef FTS_PRESSURE
+static  void tpd_down(int x, int y, int press, int p)//ckt-chunhui.lin
+#else
 static  void tpd_down(int x, int y, int p)
+#endif
 {
 #ifdef HX_PORTING_DEB_MSG
     TPD_DMESG("[Himax] tpd_down[%4d %4d]\n ", x, y);
 #endif
     input_report_key(tpd->dev, BTN_TOUCH, 1);
+#ifdef FTS_PRESSURE
+    unsigned int area = press;
+    if(area > 31) {
+	  area = (area >> 3); 
+    }
+    input_report_abs(tpd->dev, ABS_MT_PRESSURE, press);//ckt-chunhui.lin
+    input_report_abs(tpd->dev, ABS_MT_TOUCH_MAJOR, area);//ckt-chunhui.lin
+#else
     input_report_abs(tpd->dev, ABS_MT_PRESSURE, 1);//wangli
     input_report_abs(tpd->dev, ABS_MT_TOUCH_MAJOR, 20);//wangli
+#endif
     //input_report_abs(tpd->dev, ABS_MT_TOUCH_MAJOR, 1);	
     input_report_abs(tpd->dev, ABS_MT_POSITION_X, x);
     input_report_abs(tpd->dev, ABS_MT_POSITION_Y, y);
@@ -6293,7 +6317,12 @@ static  void tpd_up(int x, int y, int *count)
     TPD_DMESG("[Himax] tpd_up[%4d %4d]\n ", x, y);
 #endif
     //printk("\nHIMAX **************tpd_up[%4d %4d]***************\n ", x, y);//wangli_20140504
+#ifdef FTS_PRESSURE
+    input_report_abs(tpd->dev, ABS_MT_PRESSURE, 0); //ckt-chunhui.lin
+    input_report_abs(tpd->dev, ABS_MT_TOUCH_MAJOR, 0);
+#else
     input_report_abs(tpd->dev, ABS_MT_PRESSURE, 0);//wangli_20140429 
+#endif
     input_report_key(tpd->dev, BTN_TOUCH, 0);
     input_mt_sync(tpd->dev);
     if (FACTORY_BOOT == get_boot_mode()|| RECOVERY_BOOT == get_boot_mode())
@@ -6580,18 +6609,43 @@ static int tpd_touchinfo(struct touch_info *cinfo, struct touch_info *pinfo)
 			switch(gesture_flag)
 			{
 				case GESTURE_DOUBLE_TAP:
-					input_report_key(tpd->dev, KEY_POWER, 1);
-					input_sync(tpd->dev);
-
-					input_report_key(tpd->dev, KEY_POWER, 0);
-					input_sync(tpd->dev);
-
-					HX_Gesture=0;//Avoid TP ic in state of chaos //wangli_20140818
-					tpd_halt = 0;                    
-
-                    custom_vibration_enable(50);
+                    TMD2772_enable_ps_tp(1);
+                    msleep(10);
+                    TMD2772_read_ps_tp(&ps_data);                    
+                    //printk("======== TMD2772: ps_data=%d ========\n",ps_data);
                     
-					printk("======== 0xFC T-T ========\n");				
+                    if(ps_data >= 500)
+                    {                        
+                        printk("======== 1. T-T ps close ========\n");
+                		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
+                		mutex_lock(&i2c_access);
+                        himax_HW_reset();                        
+                	    if(himax_ts_poweron() < 0)
+                	    {
+                		    printk("[Himax] tpd_resume himax_ts_poweron failed\n");
+                	    }                     
+                        data[0] = 0x10;
+		                himax_i2c_write_data(i2c_client, 0x90, 1, &data[0]);                        
+                        mutex_unlock(&i2c_access);
+                		mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);//wangli_20140730                		
+                    }                    
+                    else
+                    {
+                        printk("======== 2. T-T ps open ========\n");
+    					input_report_key(tpd->dev, KEY_POWER, 1);
+    					input_sync(tpd->dev);
+
+    					input_report_key(tpd->dev, KEY_POWER, 0);
+    					input_sync(tpd->dev);
+                   
+                    }
+
+                    HX_Gesture=0;
+                	tpd_halt = 0;                    
+                    custom_vibration_enable(50);
+                    TMD2772_enable_ps_tp(0);
+                    
+					//printk("======== 0xFC T-T ========\n");				
 					break;
 				case GESTURE_NONE:
 /*					input_report_key(tpd->dev, KEY_POWER, 1);
@@ -6941,7 +6995,7 @@ static int tpd_touchinfo(struct touch_info *cinfo, struct touch_info *pinfo)
 			       if((x <= x_res) && (y <= y_res))
 			       {
 
-				       press = data[4*HX_MAX_PT+i];
+				       press = data[4*HX_MAX_PT+i] * 2;//ckt-chunhui.lin
 				       area = press;
 				       if(area > 31)
 				       {
@@ -7041,7 +7095,12 @@ static int tpd_touchinfo(struct touch_info *cinfo, struct touch_info *pinfo)
 	       {
 		       if(point_key_flag==false)
 		       {
+#ifdef FTS_PRESSURE
+                               //ckt-chunhui.lin
+			       tpd_down(tpd_keys_dim_local[tpd_key-1][0],tpd_keys_dim_local[tpd_key-1][1], 1, 0);
+#else
 			       tpd_down(tpd_keys_dim_local[tpd_key-1][0],tpd_keys_dim_local[tpd_key-1][1], 0);
+#endif
 #ifdef HX_ESD_WORKAROUND
 			       TOUCH_UP_COUNTER = 0;
 #endif 
@@ -7052,8 +7111,13 @@ static int tpd_touchinfo(struct touch_info *cinfo, struct touch_info *pinfo)
 #endif
 		       point_key_flag=false;
 	       }
-#else    
+#else 
+#ifdef FTS_PRESSURE   
+               //ckt-chunhui.lin
+	       tpd_down(tpd_keys_dim_local[tpd_key-1][0],tpd_keys_dim_local[tpd_key-1][1], 1, 0);
+#else
 	       tpd_down(tpd_keys_dim_local[tpd_key-1][0],tpd_keys_dim_local[tpd_key-1][1], 0);
+#endif
 	       HX_KEY_HIT_FLAG=true;
 #ifdef HX_ESD_WORKAROUND
 	       TOUCH_UP_COUNTER = 0;
@@ -7191,8 +7255,13 @@ static int touch_event_handler(void *unused)
 				{
 					printk("touch_event_handler HX_MAX_PT=%d,cinfo.x[i]=%d cinfo.y[i]=%d\n",HX_MAX_PT,cinfo.x[i],cinfo.y[i]);//wangli_20140504
 					if(HX_KEY_HIT_FLAG == false)
+#ifdef FTS_PRESSURE
+                                                //ckt-chunhui.lin
+						tpd_down(cinfo.x[i], cinfo.y[i], cinfo.p[i], cinfo.id[i]);
+#else
 						tpd_down(cinfo.x[i], cinfo.y[i], cinfo.id[i]);
 						//tpd_down(cinfo.y[i], cinfo.x[i], cinfo.id[i]); //wangli_20140507
+#endif
 				}
 			}
 			printk("\nhx_point_num = %d   last_hx_point_num = %d\n",hx_point_num,last_hx_point_num);//wangli_20140504
@@ -7361,6 +7430,10 @@ static int __devinit tpd_probe(struct i2c_client *client, const struct i2c_devic
 	input_set_capability(tpd->dev, EV_KEY, KEY_F15);
 	input_set_capability(tpd->dev, EV_KEY, KEY_F16);
 	input_set_capability(tpd->dev, EV_KEY, KEY_F17);*/
+#endif
+#ifdef FTS_PRESSURE
+        input_set_abs_params(tpd->dev, ABS_MT_PRESSURE, 0, PRESS_MAX, 0, 0); //ckt-chunhui.lin
+        input_set_abs_params(tpd->dev, ABS_MT_TOUCH_MAJOR, 0, PRESS_MAX, 0, 0);
 #endif
 
 #ifdef MT6592

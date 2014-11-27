@@ -104,7 +104,7 @@
 
 #define BOARD_ID                MT6592_EVB
 
-#define CS_PART_NUMBER[0]       H9TP17ABLDMCNR_KGM
+#define CS_PART_NUMBER[0]       H9TCNNNBLDMMPR_NGM
 #define CS_PART_NUMBER[1]       EDBA232B1MA_1D_F
 
 #endif /* __CUSTOM_MEMORYDEVICE__ */

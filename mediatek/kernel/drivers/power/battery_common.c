@@ -2197,8 +2197,12 @@ static void mt_battery_thermal_check(void)
         //ignore default rule
 #else    
         #ifdef TEMPERATURE_CONTROL_CHARGING
-		if(BMT_status.temperature >= MAX_CHARGE_POWEROFF_TEMPERATURE)
-	#else
+		#ifdef USE_FOR_BULMA_HE
+		 if(BMT_status.temperature >= MAX_CHARGE_POWEROFF_TEMPERATURE)
+		#else
+		 if(BMT_status.temperature >= MAX_CHARGE_POWEROFF_TEMPERATURE || BMT_status.temperature <= MIN_CHARGE_POWEROFF_TEMPERATURE)
+		#endif
+	    #else
 		if(BMT_status.temperature >= 60)
         #endif
         {
