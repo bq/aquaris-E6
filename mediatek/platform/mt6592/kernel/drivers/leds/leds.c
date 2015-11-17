@@ -34,7 +34,7 @@
 //#include <linux/leds_sw.h>
 //#include <mach/mt_pmic_feature_api.h>
 //#include <mach/mt_boot.h>
-#ifdef CUSTOM_KERNEL_GYROSCOPE_BULMA
+#ifdef BULMA_PROJECT
 #include "aw2013.h"
 #endif
 static DEFINE_MUTEX(leds_mutex);
@@ -979,7 +979,7 @@ int mt_mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 			//LEDS_DEBUG("brightness_set_cust:backlight control by BLS_PWM done!!\n");
 			//#endif
         //add aw2013 for NLED test 
-#ifdef CUSTOM_KERNEL_GYROSCOPE_BULMA
+#ifdef BULMA_PROJECT
         case MT65XX_LED_MODE_CUST:
             if(strcmp(cust->name,"red") == 0) {
                 led = 0;

@@ -67,8 +67,9 @@ OBJS += \
 	$(LOCAL_DIR)/dsi_drv.o\
 	$(LOCAL_DIR)/ufoe_drv.o\
 	$(LOCAL_DIR)/partition_mt.o\
-  $(LOCAL_DIR)/mt_get_dl_info.o \
+	$(LOCAL_DIR)/mt_get_dl_info.o \
 	$(LOCAL_DIR)/mtk_wdt.o\
+	$(LOCAL_DIR)/aw2013_lk.o\
 	$(LOCAL_DIR)/mt_leds.o\
 	$(LOCAL_DIR)/recovery.o\
 	$(LOCAL_DIR)/meta.o\

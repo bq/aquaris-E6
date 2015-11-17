@@ -20,13 +20,17 @@
 #include <platform/mt_leds.h>
 //#include <asm/io.h>
 
-#include <platform/mt_pmic.h> 
-
+#include <platform/mt_pmic.h>
 
 //extern void mt_power_off (U32 pwm_no);
 //extern S32 mt_set_pwm_disable ( U32 pwm_no );
 extern void mt_pwm_disable(U32 pwm_no, BOOL pmic_pad);
 extern int strcmp(const char *cs, const char *ct);
+
+#ifdef BULMA_PROJECT
+extern void led_flash_aw2013( unsigned int id );
+extern void Suspend_led();
+#endif
 
 #ifdef BLK_LEVEL_LIMIT_CUST //for a special Backlight Driver IC
 #define MIN_VALUE_DUTY    8
@@ -493,6 +497,7 @@ static int brightness_set_gpio(int gpio_num, enum led_brightness level)
 
 static int mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 {
+    unsigned int led;//wangli_20140722
 	unsigned int BacklightLevelSupport = Cust_GetBacklightLevelSupport_byPWM();
 	if (level > LED_FULL)
 		level = LED_FULL;
@@ -544,6 +549,26 @@ static int mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
                }
 			 #endif
 			return ((cust_brightness_set)(cust->data))(level);
+#ifdef BULMA_PROJECT             
+        case MT65XX_LED_MODE_CUST:
+            if(strcmp(cust->name,"red") == 0) {
+                led = 0;
+            }
+            else if(strcmp(cust->name,"green") == 0) {
+                led = 1;
+            }
+            else {
+                led = 2;
+            }
+            printf("==== mt_mt65xx_led_set_cust:led=%d ====\n",led);
+            if(level == 0) {
+                Suspend_led();
+            }
+            else {
+                led_flash_aw2013(led);
+            }
+            return 0;
+#endif            
 		case MT65XX_LED_MODE_NONE:
 		default:
 			break;
@@ -604,6 +629,7 @@ void leds_init(void)
 {
 	printf("[LEDS]LK: leds_init: mt65xx_backlight_off \n\r");
 	mt65xx_backlight_off();
+    Suspend_led();//wangli_20140812 led off in lk
 }
 
 void isink0_init(void)
@@ -623,6 +649,7 @@ void leds_deinit(void)
 	mt65xx_leds_brightness_set(MT65XX_LED_TYPE_RED, LED_OFF);
 	mt65xx_leds_brightness_set(MT65XX_LED_TYPE_GREEN, LED_OFF);
 	mt65xx_leds_brightness_set(MT65XX_LED_TYPE_BLUE, LED_OFF);
+    Suspend_led();//wangli_20140812 led off in lk
 }
 
 void mt65xx_backlight_on(void)

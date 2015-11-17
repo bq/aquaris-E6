@@ -1490,6 +1490,11 @@ static void battery_update(struct battery_data *bat_data)
     }
 
 	battery_xlog_printk(BAT_LOG_CRTI, "UI_SOC=(%d), resetBatteryMeter=(%d)\n", BMT_status.UI_SOC,resetBatteryMeter);	
+ /*Every time to check if the battery capacity is abnormal,and then correct it*/
+    #if CKT_CUSTOM_METHOD_CORRECT_CAPACITY
+    battery_capacity_adjustment_terminal(oam_d_3,oam_d_4,oam_d_5,gFG_DOD0);
+    #else
+    #endif
 
 	// set RTC SOC to 1 to avoid SOC jump in charger boot.
 	if (BMT_status.UI_SOC <= 1) {
@@ -2399,14 +2404,14 @@ void do_chrdet_int_task(void)
 		{
 			mutex_lock(&adjust_mutex);
 			adjustinfo.need_adjust=KAL_FALSE;
-			if(!BMT_status.charger_exist) // 充电器不存在,刚拔出充电器,判断是不是要调整 苏 勇 2014年05月14日 19:57:51
+			if(!BMT_status.charger_exist) 
 			{
-// 苏 勇 2014年05月16日 13:58:18				BMT_status.UI_SOC=100; // for test 苏 勇 2014年05月14日 20:49:54
-// 苏 勇 2014年05月16日 13:58:08				BMT_status.UI_SOC=BMT_status.SOC+10; //   苏 勇 2014年05月15日 10:45:18
-// 苏 勇 2014年05月16日 13:58:08				if(BMT_status.UI_SOC>100)
-// 苏 勇 2014年05月16日 13:58:08				{
-// 苏 勇 2014年05月16日 13:58:08					BMT_status.UI_SOC=100;
-// 苏 勇 2014年05月16日 13:58:08				}
+				//BMT_status.UI_SOC=100; // for test 
+				//BMT_status.UI_SOC=BMT_status.SOC+10; 
+				//if(BMT_status.UI_SOC>100)
+				//{
+				//	BMT_status.UI_SOC=100;
+				//}
 				if(
 					(BMT_status.UI_SOC-BMT_status.SOC>MAX_DIFF_UI_AND_SOC)
 					 && (BMT_status.SOC>MIN_SOC_FOR_ADJUST)
@@ -2415,7 +2420,7 @@ void do_chrdet_int_task(void)
 					adjustinfo.diff=BMT_status.UI_SOC-BMT_status.SOC;
 					adjustinfo.step=(BMT_status.SOC-MIN_SOC_FOR_ADJUST)/adjustinfo.diff;
 					adjustinfo.begin_SOC=BMT_status.SOC;
-					if(adjustinfo.step==0) // 如果根本不没有足够的范围来调整差别,就采用默认的处理 苏 勇 2014年05月15日 10:24:56
+					if(adjustinfo.step==0) // \C8\E7\B9\FB\B8\F9\B1\BE\B2\BB没\D3\D0\D7愎籠B5姆\B6围\C0\B4\B5\F7\D5\FB\B2\EE\B1\F0,\BE筒\C9\D3\C3默\C8系拇\A6\C0\ED \CB\D5 \D3\C2 2014\C4\EA05\D4\C215\C8\D5 10:24:56
 					{
 					}
 					else

@@ -94,7 +94,7 @@
 #define VBAT_NORMAL_WAKEUP		3600		//3.6V
 #define VBAT_LOW_POWER_WAKEUP		3500		//3.5v
 #define NORMAL_WAKEUP_PERIOD		5400 		//90 * 60 = 90 min
-#define LOW_POWER_WAKEUP_PERIOD		300		//5 * 60 = 5 min
+#define LOW_POWER_WAKEUP_PERIOD		120		// 2 * 60 = 2 min
 #define CLOSE_POWEROFF_WAKEUP_PERIOD	30	//30 s
 
 #endif	//#ifndef _CUST_BATTERY_METER_H

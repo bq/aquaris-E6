@@ -37,6 +37,10 @@
 //#include <linux/leds_hal.h>
 #include "leds_drv.h"
 
+#ifdef BULMA_PROJECT
+#include "aw2013.h"
+#endif
+
 
 
 /****************************************************************************
@@ -699,7 +703,13 @@ static void mt65xx_leds_shutdown(struct platform_device *pdev)
             case MT65XX_LED_MODE_CUST_BLS_PWM:
 				LEDS_DRV_DEBUG("[LED]backlight control through BLS!!1\n");
 			    ((cust_set_brightness)(g_leds_data[i]->cust.data))(0);
-                break;    
+                break;
+#ifdef BULMA_PROJECT
+            case MT65XX_LED_MODE_CUST:
+                LEDS_DRV_DEBUG("==== aw2013 led off ====\n");
+                Suspend_led();
+                break;
+#endif                
 		    case MT65XX_LED_MODE_NONE:
 		    default:
 			    break;
@@ -727,11 +737,60 @@ static struct platform_device mt65xx_leds_device = {
 
 #endif
 
+#if 1
+static ssize_t aw2013_write(struct kobject *kobj,
+			struct bin_attribute *attr,
+			char *buf, loff_t off, size_t count)
+{
+#ifdef BULMA_PROJECT
+	printk("======== aw2013_write:Suspend_led ========\n");
+	Suspend_led();
+#else
+	printk("======== brightness_set_pmic:pmic_led_off ========\n");
+	brightness_set_pmic(MT65XX_LED_PMIC_NLED_ISINK0, 0, 0);
+	brightness_set_pmic(MT65XX_LED_PMIC_NLED_ISINK1, 0, 0);
+	brightness_set_pmic(MT65XX_LED_PMIC_NLED_ISINK2, 0, 0);
+#endif
+	return count;
+}
+
+static ssize_t aw2013_read(struct kobject *kobj,
+			struct bin_attribute *attr, 
+			char *buf, loff_t off, size_t count)
+{
+	printk("======== aw2013_read!!!!! ========\n");
+	int i=100;
+	while(i>0)
+	{
+    	mdelay(100);
+    	i--;
+	}
+	return count;
+}
+static struct bin_attribute aw2013_attr = {
+	.attr = {
+		.name = "aw2013led",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = 4,
+	.read = aw2013_read,
+	.write = aw2013_write,
+};
+#endif
+
 static int __init mt65xx_leds_init(void)
 {
 	int ret;
 
 	LEDS_DRV_DEBUG("[LED]%s\n", __func__);
+
+#if 1
+	ret = sysfs_create_bin_file(&(module_kset->kobj), &aw2013_attr);
+	if (ret) {
+		printk(KERN_ERR "======== AW2013:Failed to create sys file ========\n");
+		return -ENOMEM;
+	}
+#endif
 
 #if 0
 	ret = platform_device_register(&mt65xx_leds_device);
