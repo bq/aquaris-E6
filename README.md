@@ -1,7 +1,9 @@
 WHAT IS THIS?
 =============
 
-Linux Kernel source code for the device bq Aquaris E6
+Linux Kernel source code for the devices:
+* bq aquaris E6
+
 
 BUILD INSTRUCTIONS?
 ===================
@@ -9,15 +11,41 @@ BUILD INSTRUCTIONS?
 Specific sources are separated by branches and each version is tagged with it's corresponding number. First, you should
 clone the project:
 
-	$ git clone git@github.com:bq/aquaris-E6.git
+        $ git clone https://github.com/bq/aquaris-E6.git
 
 After it, choose the version you would like to build:
 
-	$ cd aquaris-E6/
-	$ git checkout 1.1.0_20140908-0900
+*Aquaris E6 *
+
+        $ mv aquaris-E6 kernel
+        $ cd kernel
+        $ git checkout aquaris-E6
+
+At the same level of the "kernel" directory:
+
+Download a prebuilt gcc
+
+        $ git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8
+
+Create KERNEL_OUT dir:
+
+        $ mkdir KERNEL_OUT
+
+Your directory tree should look like this:
+* kernel
+* arm-eabi-4.8
+* KERNEL_OUT
+
+Finally, build the kernel according the next table of product names:
+
+| device                    | product                 |
+| --------------------------|-------------------------|
+| bq aquaris E6             | bulma                   |
 
 
-Finally, build the kernel:
+        $ make -C kernel  O=../KERNEL_OUT  ARCH=arm CROSS_COMPILE=../arm-eabi-4.8/bin/arm-eabi- {product}_defconfig
+        $ make O=../KERNEL_OUT/ -C kernel ARCH=arm  CROSS_COMPILE=../arm-eabi-4.8/bin/arm-eabi-                       
+    
+You can specify "-j CORES" argument to speed-up your compilation, example:
 
-	$ ./makeMtk -t bulma n k
-
+        $ make O=../KERNEL_OUT/ -C kernel ARCH=arm  CROSS_COMPILE=../arm-eabi-4.8/bin/arm-eabi- -j 8
